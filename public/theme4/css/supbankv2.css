@@ -1,0 +1,114 @@
+body {
+    font: 400 14px/1.6 Tahoma,Verdana,Helvetica,sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #fff
+}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+td, th {
+  border: 0px solid;
+  border-bottom: solid 0.5px #ad4105;
+  text-align: left;
+  padding: 8px;
+  font-size: 13px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+}
+code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    white-space: nowrap;
+    border-radius: 4px
+}
+.menu {
+    width: 48.5%;
+    background-color:#6d2f0f ;
+    text-align: center;
+    display: inline-block;
+    line-height: normal ;    
+    padding: 10px 0;
+    font-size: 13px;
+    margin: 0 auto;
+}
+.menu-item{
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    margin: 0 6px;
+    cursor: pointer;
+}
+.menu-item:hover{
+    text-decoration: underline;
+}
+.act {
+    text-decoration: underline !important;
+}
+.label {
+    display: inline;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em
+}
+.label-default {
+    background-color: #999;
+}
+
+.label-default[href]:hover,
+.label-default[href]:focus {
+    background-color: gray;
+}
+
+.label-primary {
+    background-color: #ad4105;
+}
+
+.label-primary[href]:hover,
+.label-primary[href]:focus {
+    background-color: #3071a9;
+}
+
+.label-success {
+    background-color: #5cb85c;
+}
+
+.label-success[href]:hover,
+.label-success[href]:focus {
+    background-color: #449d44;
+}
+
+.label-info {
+    background-color: #5bc0de;
+}
+
+.label-info[href]:hover,
+.label-info[href]:focus {
+    background-color: #31b0d5;
+}
+
+.label-warning {
+    background-color: #f0ad4e;
+}
+
+.label-warning[href]:hover,
+.label-warning[href]:focus {
+    background-color: #ec971f;
+}
+
+.label-danger {
+    background-color: #d9534f;
+}
+
+.label-danger[href]:hover,
+.label-danger[href]:focus {
+    background-color: #c9302c;
+}

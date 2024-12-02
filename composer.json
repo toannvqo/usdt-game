@@ -1,0 +1,14 @@
+{
+    "require": {
+        "predis/predis": "^1.1",
+        "phpmailer/phpmailer": "^6.5",
+        "mobiledetect/mobiledetectlib": "^2.8",
+        "cboden/ratchet": "^0.4.4",
+        "textalk/websocket": "^1.0",
+        "guzzlehttp/guzzle": "^7.7",
+        "phpseclib/phpseclib": "^2.0",
+        "illuminate/auth": "^8.83",
+        "pusher/pusher-php-server": "^7.2",
+        "wisembly/elephant.io": "^3.3"
+    }
+}

@@ -1,0 +1,31 @@
+.form-check-custom {
+    display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+ @media (max-width: 767px) {
+    .form-check-custom {
+   
+  gap: 5px;
+}
+.list-game-custom {
+    flex-wrap: wrap !important;
+    justify-content: center;
+}
+
+.form-group-custom {
+    display: flex !important;
+    justify-content: center;
+}
+.form-check-custom-1 {
+    width: 100%;
+}
+}
+.button-check-custom {
+    margin-top: 0 !important;
+}
+.button-check-custom-nv {
+    display: flex;
+    justify-content: flex-start;
+}
