@@ -1,9 +1,9 @@
 <?php
     define('VERSION','2.0.1');
-    define('DB_HOST','localhost');
-    define('USERNAME','chanlebk_com');
-    define('PASSWORD','7eA7HkHHfryCtYiS');
-    define('DATABASE','chanlebk_com');
+    define('DB_HOST','85.209.133.151');
+    define('USERNAME','usdt_game');
+    define('PASSWORD','cZWrNhzjKzwwS8ai');
+    define('DATABASE','usdt_game');
     define('publickey','-----BEGIN RSA PUBLIC KEY----- MEgCQQDZ8jz3tzUWheEy/dG0xdSVudJg1hrwsGyq83ZjZLxplfN6UE7fFc1PxlWh t2OH0EppQEJ6WHMu9IldHDNWk+K5AgMBAAE= -----END RSA PUBLIC KEY-----');
     define('privatekey','-----BEGIN RSA PRIVATE KEY----- MIIBPAIBAAJBANnyPPe3NRaF4TL90bTF1JW50mDWGvCwbKrzdmNkvGmV83pQTt8V zU/GVaG3Y4fQSmlAQnpYcy70iV0cM1aT4rkCAwEAAQJBALAoTkT+jOdOgM5BP324 pPH8BuIETDQctUibjiYaJvvDHA3u2jApmMKdEaCfG17HTa4P5me0zNWcdyq5J2La egECIQD9JXKtrP/WbgOZfaFLLszrH344xIbfVpMR6lgjXonWQQIhANxnNPBlYyoY KiqChqbeVo68L93b57z/6W9BeCv/0h55AiEA3sNAajLNo52GD2DtOeLCMrmw8jWG 1iwyGVbWHrHHq8ECIQC2AsD0GTY4J/aCXoImQYxHmV8KHzUTnl6/EtjTtRJnOQIg SnmQR6ioC3ZWge3zxaKBpeRRmJJAlDgOK3PUpPNivzg= -----END RSA PRIVATE KEY-----');
     define('id_admin','1');

@@ -9,12 +9,11 @@ use GuzzleHttp\Client;
 class GateIO
 {
     protected $uid;
-    protected $client;
     protected $BALANCE;
     protected $apiKey_gateio;
     protected $apiSecret_gateio;
     protected $tkuma;
-
+    protected $client;
     protected $url = [
         "apiKey_gateio" => "8d97591cc0ba56da5699a5965e48a207",
         "apiSecret_gateio" => "d192be47ffed9938445f29fda253e5882cc6ff12a74d9c65135576ec7de1bb26",
@@ -62,7 +61,7 @@ class GateIO
         ];
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->url['baseUrl_gateio'] . $url);
+        curl_setopt($ch, CURLOPT_URL, $this->url['baseUrl_gateio'] . $url . "?" . $queryParam);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 

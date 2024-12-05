@@ -7,10 +7,10 @@ require_once(__DIR__ . "/../../libs/helper.php");
 require_once(__DIR__ . "/../../libs/class/VietCombank.php");
 require_once(__DIR__ . "/../../libs/class/MBB2.php");
 require_once(__DIR__ . "/../../libs/class/bidv.php");
-
+require_once(__DIR__ . "/../../libs/class/GateIO.php");
 
 $tkuma = new DB();
-$Mobile_Detect = new Mobile_Detect();
+// $Mobile_Detect = new Mobile_Detect();
 
 
 use PragmaRX\Google2FAQRCode\Google2FA;
@@ -26,18 +26,18 @@ if (isset($_POST['action'])) {
 	}
 
 	//Tạm comment để bỏ check quyền admin
-	 if (empty($_SESSION['admin_login'])) {
-	 		die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
-	 	}
-	 	if (!$getadmin = $tkuma->get_row("SELECT * FROM `users` WHERE `token` = ? ",[$_SESSION['admin_login']])) {
-	 	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
-	 }
-	 if (myip() != $getadmin['ip']) {
-	 	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
-	 }
-	 if (is_admin() == false) {
-	 	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
-	 }
+	//  if (empty($_SESSION['admin_login'])) {
+	//  		die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
+	//  	}
+	//  	if (!$getadmin = $tkuma->get_row("SELECT * FROM `users` WHERE `token` = ? ",[$_SESSION['admin_login']])) {
+	//  	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
+	//  }
+	//  if (myip() != $getadmin['ip']) {
+	//  	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
+	//  }
+	//  if (is_admin() == false) {
+	//  	die(json_encode(['status' => 'error', 'msg' => 'Bạn không có quyền này !']));
+	//  }
 	if ($_POST['action'] == "chuyentienmbbank") {
 
 		if (empty(check_string($_POST['pass2']))) {
@@ -1151,5 +1151,35 @@ if (isset($_POST['action'])) {
 				} else {
 					die(json_encode(['status' => 'error', 'msg' => 'Lỗi thực hiện #ps 1!']));
 				}
+	}
+
+	if ($_POST['action'] == 'TestGateIo') {
+		$uid = check_string($_POST['uid']);
+		$apiKey_gateio = check_string($_POST['apiKey_gateio']);
+		$apiSecret_gateio = check_string($_POST['apiSecret_gateio']);
+		if (empty($uid)) {
+			die(json_encode(['status' => '1', 'msg' => 'Vui lòng điền uid']));
+		}
+		if (empty($apiKey_gateio)) {
+			die(json_encode(['status' => '1', 'msg' => 'Vui lòng điền apiKey']));
+		}
+		if (empty($apiSecret_gateio)) {
+			die(json_encode(['status' => '1', 'msg' => 'Vui lòng điền apiSecret']));
+		}
+		//Kết thúc log
+		error_log(message: $uid);
+
+		$gateio = new GateIO($uid, $apiKey_gateio, $apiSecret_gateio);
+		$tam = json_encode($gateio->getBalance());
+		//Log kết quả trả về
+		error_log(message: $tam);
+		//Trả kết quả về cho
+		
+
+		$tam = json_encode($gateio->getTransactionHistoryV2());
+
+		error_log(message: $tam);
+		
+		die(json_encode(['status' => 'success', 'msg' => 'Thành công !']));
 	}
 }
