@@ -10,18 +10,18 @@ $tkuma = new DB();
 
 $cronController = new CronController('gateio');
 if ($_GET['type'] == $tkuma->site('pin_cron')) {
-    	//	sendMessTelegramNew("Bắt đầu cron lsgd");
+	//	sendMessTelegramNew("Bắt đầu cron lsgd");
 	// 	// if (checkCron('5') == false) {
 	// 		die(json_encode(['status' => 'error', 'msg' => 'Thao tác quá nhanh, vui lòng đợi']));
 	// 	// }
-	 if (!$cronController->canRun()) {
-	   //  sendMessTelegramNew("Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.");
-	 	die('Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.');
-	 }
-      if (getRowRealtime('cronjobsact', '5', 'status') == 0) {
-        //  sendMessTelegramNew("Chức năng không hoạt động");
+	if (!$cronController->canRun()) {
+		//  sendMessTelegramNew("Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.");
+		die('Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.');
+	}
+	if (getRowRealtime('cronjobsact', '5', 'status') == 0) {
+		//  sendMessTelegramNew("Chức năng không hoạt động");
 		die(json_encode(['status' => 'error', 'msg' => 'Chức năng không hoạt động']));
-	 }
+	}
 
 	if ($tkuma->site('status_randommsg') != 0) {
 		$names = $tkuma->site('random_msg');
@@ -35,7 +35,7 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 	$get_cmt_band = $tkuma->site('band');
 	$msg_send = $get_cmt . ": " . $tranIdd;
 	$msg_band = $get_cmt_band;
-	$getlist_momo = $tkuma->get_list("SELECT * FROM `exchange_account` WHERE `status` = ? ORDER BY `id` ASC ", ['success']);
+	$getlist_momo = $tkuma->get_list("SELECT * FROM `gate_count` WHERE `status` = ? ORDER BY `id` ASC ", ['success']);
 
 	if ($getlist_momo) {
 		#1
@@ -61,8 +61,8 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 			// 			if (isset($gethistt->data->result->responseCode) && $gethistt->data->result->responseCode !== '00') {
 			// 			//	sendMessTelegramNew("Lấy lịch sử giao dịch thành công: " . json_encode($gethistt));
 			// 			//	sendMessTelegramNew('update balance!');
-            //                 balancemb2($rows['token']);
-            //                 die("Vui lòng Chờ phiên tiếp theo:  ❎<br>\n");
+			//                 balancemb2($rows['token']);
+			//                 die("Vui lòng Chờ phiên tiếp theo:  ❎<br>\n");
 			// 				// $gethistt = json_encode($gethistt);
 			// 				// $gethistt = json_decode($gethistt, true);
 			// 			} else {
@@ -83,23 +83,23 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 			// if (isset($gethistt['data']['transactionHistoryList']) && count($gethistt['data']['transactionHistoryList']) > 0) {
 			// 	foreach ($gethistt['data']['transactionHistoryList'] as $ROWHIST) {
 
-            //   sendMessTelegramNew("gethistt->transactionHistoryList: " . $gethistt->data->transactionHistoryList );
+			//   sendMessTelegramNew("gethistt->transactionHistoryList: " . $gethistt->data->transactionHistoryList );
 			if ($gethistt->data != null || $gethistt->data != "") {
 				foreach ($gethistt->data as $ROWHIST) {
-				//	sendMessTelegramNew("Lịch sử giao dịch: " . json_encode($ROWHIST));
+					//	sendMessTelegramNew("Lịch sử giao dịch: " . json_encode($ROWHIST));
 
 					#3
 					$push_uid = $ROWHIST->push_uid;
 					$gettranid = $ROWHIST->id;
-					
-				//	sendMessTelegramNew("gettranid " . $gettranid);
-					
+
+					//	sendMessTelegramNew("gettranid " . $gettranid);
+
 					if (strpos($gettranid, '\\') !== false) {
 						$tranIdd = substr($gettranid, 2, strpos($gettranid, '\\') - 2);
 					} else {
 						$tranIdd = preg_replace('/\D/', '', $gettranid);
 					}
-	
+
 
 
 					$settings1 = strtolower($ROWHIST->message); //ND chuyển TIỀN
@@ -118,20 +118,20 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 					$partnerID = $getuser['stk'] ?? '';
 					$pattern = $tkuma->site('ndnaptien') . $getiduser;
 					// 	if (preg_match("/$pattern ([^. ]+)[. ]?/", $settings1, $matches)) {
-				//	if (preg_match("/$pattern ([^-.\s]+)[. -]?/", $settings1, $matches)) {
-				//		$comment = $matches[1];
-				//	} else {
-				//		$comment = $settings1;
-				//	}
-					
+					//	if (preg_match("/$pattern ([^-.\s]+)[. -]?/", $settings1, $matches)) {
+					//		$comment = $matches[1];
+					//	} else {
+					//		$comment = $settings1;
+					//	}
+
 					$amount = $ROWHIST->amount;  //SỐ TIỀN GIAO DỊCH
-					
-				  //  sendMessTelegramNew("check sai noi dung :" . $getiduser);
-				  //  sendMessTelegramNew("getuser :" . $getuser['stk']);
-									  
+
+					//  sendMessTelegramNew("check sai noi dung :" . $getiduser);
+					//  sendMessTelegramNew("getuser :" . $getuser['stk']);
+
 					$comment = substr($amount, -2);
 					$partnerName = $getuser['username'] ?? '';  //NGƯỜI CHUYỂN 
-					$dataline = "MBBANK2|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST->create_time) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . $settings1 . "|" . getRowRealtime2('exchange_account', 'phone', $push_uid, 'name') . "|" . $push_uid;
+					$dataline = "MBBANK2|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST->create_time) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . $settings1 . "|" . getRowRealtime2('gate_count', 'phone', $push_uid, 'name') . "|" . $push_uid;
 					$tranIdd2 = 0;
 					$gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
 
@@ -144,15 +144,15 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 					// 	    $gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
 					// 	}
 					if ($gettranIdc || $ROWHIST->status != "PENDING") {
-					  //  sendMessTelegramNew("đã tồn tại mã gd");
+						//  sendMessTelegramNew("đã tồn tại mã gd");
 						echo "ĐÃ TỒN TẠI MÃ GIAO DỊCH: " . $tranIdd . " ❎<br>\n";
 					} else {
 						$RESULT_PLAY = KETQUA_BILL($comment, $tranIdd);
 						$ti_le =  $RESULT_PLAY['tile'] ?? 0;
 
 						$tien_nhan = so_nguyen($amount * $ti_le);
-                        
-                     //   sendMessTelegramNew("RESULT_PLAY: ", $RESULT_PLAY);
+
+						//   sendMessTelegramNew("RESULT_PLAY: ", $RESULT_PLAY);
 
 						$tkuma->insert("lich_su_choi", [
 							'phone'  =>   $partnerID,
@@ -177,32 +177,33 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 							'databill' => base64_encode($dataline),
 							'md5bill' => md5($dataline)
 						]);
-						
-						
-					//	sendMessTelegramNew("ket qua: ",$RESULT_PLAY['status']);
-					
+
+
+						//	sendMessTelegramNew("ket qua: ",$RESULT_PLAY['status']);
+
 						//	echo ("update ban ghi thua: ". $GHI_DTB);
-							if($is_wrong_content == 1 || $is_wrong_content == "1"){
-							     $tkuma->update("lich_su_choi", [
+						if ($is_wrong_content == 1 || $is_wrong_content == "1") {
+							$tkuma->update("lich_su_choi", [
 								'status' => 'sainoidung',
 								'msg_send' => 'Đang Chờ hoàn tiền',
 								'result_text' => 'SAI NỘI DUNG',
 								'result' => 'sainoidung',
 								'result_number' => 1,
-								], " `tranId` = ?  ", [$tranIdd]);
-							    echo "Giao dich sai noi dung: " . $getiduser . " ❎<br>\n";
-											continue;
-							}
-						
-						
+							], " `tranId` = ?  ", [$tranIdd]);
+							echo "Giao dich sai noi dung: " . $getiduser . " ❎<br>\n";
+							continue;
+						}
+
+
 						if ($RESULT_PLAY['status'] == "error") {
 							$GHI_DTB = $tkuma->update("lich_su_choi", [
 								'game' => $RESULT_PLAY['game'] ?? '',
 								'ma_game' => $RESULT_PLAY['key'] ?? '',
 								'result' => $RESULT_PLAY['status'],
-								'result_text' => $RESULT_PLAY['message']], " `tranId` = ?  ", [$tranIdd]);
-								
-					
+								'result_text' => $RESULT_PLAY['message']
+							], " `tranId` = ?  ", [$tranIdd]);
+
+
 							if ($GHI_DTB) {
 								echo "CRON THÀNH CÔNG : " . $tranIdd . " ✅<br>\n";
 							} else {

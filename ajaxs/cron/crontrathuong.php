@@ -67,7 +67,7 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 						'date_time' => gettime(),
 						'time' => gettime()
 					]);
-					$tkuma->update("lich_su_choi",['status' => 'success','msg_send' => 'Thành công']," `tranId` = ?  ",[$rows['tranId']]);
+					$tkuma->update("lich_su_choi",['status' => 'success','msg_send' => 'Thành công']," `tranId` = ?  ",whereParameters: [$rows['tranId']]);
 					$tkuma->update("account_vcb",['typech' => '0']," `id` = ?  ",[$get_momo['id']]);
 					echo "CRON THÀNH CÔNG : " . $rows['tranId'] . " ✅<br>\n";
 				} else {
