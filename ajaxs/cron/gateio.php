@@ -3,94 +3,80 @@ define("IN_SITE", true);
 require_once(__DIR__ . '/../../libs/db.php');
 require_once(__DIR__ . '/../../libs/config.php');
 require_once(__DIR__ . '/../../libs/helper.php');
-require_once(__DIR__ . '/../../libs/class/MBB2.php');
 require_once(__DIR__ . '/../../libs/redis.php');
+require_once(__DIR__ . "/../../libs/class/GateIO.php");
 
 $tkuma = new DB();
 
-$cronController = new CronController('gateio');
-if ($_GET['type'] == $tkuma->site('pin_cron')) {
-	//	sendMessTelegramNew("Bắt đầu cron lsgd");
-	// 	// if (checkCron('5') == false) {
-	// 		die(json_encode(['status' => 'error', 'msg' => 'Thao tác quá nhanh, vui lòng đợi']));
-	// 	// }
-	if (!$cronController->canRun()) {
-		//  sendMessTelegramNew("Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.");
-		die('Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.');
-	}
-	if (getRowRealtime('cronjobsact', '5', 'status') == 0) {
-		//  sendMessTelegramNew("Chức năng không hoạt động");
-		die(json_encode(['status' => 'error', 'msg' => 'Chức năng không hoạt động']));
-	}
+// $cronController = new CronController('gateio');
+// if ($_GET['type'] == $tkuma->site('pin_cron')) {
+// 	//	sendMessTelegramNew("Bắt đầu cron lsgd");
+// 	// 	// if (checkCron('5') == false) {
+// 	// 		die(json_encode(['status' => 'error', 'msg' => 'Thao tác quá nhanh, vui lòng đợi']));
+// 	// 	// }
+// 	if (!$cronController->canRun()) {
+// 		//  sendMessTelegramNew("Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.");
+// 		die('Cron job đã chạy quá số lần cho phép trong khoảng thời gian này.');
+// 	}
+// 	if (getRowRealtime('cronjobsact', '5', 'status') == 0) {
+// 		//  sendMessTelegramNew("Chức năng không hoạt động");
+// 		die(json_encode(['status' => 'error', 'msg' => 'Chức năng không hoạt động']));
+// 	}
 
-	if ($tkuma->site('status_randommsg') != 0) {
-		$names = $tkuma->site('random_msg');
-		$name_array = explode(",", $names);
-		$random_key = array_rand($name_array);
-		$selected_name = $name_array[$random_key];
-		$get_cmt = $selected_name;
-	} else {
-		$get_cmt = $tkuma->site('msg_game');
-	}
-	$get_cmt_band = $tkuma->site('band');
-	$msg_send = $get_cmt . ": " . $tranIdd;
-	$msg_band = $get_cmt_band;
-	$getlist_momo = $tkuma->get_list("SELECT * FROM `gate_count` WHERE `status` = ? ORDER BY `id` ASC ", ['success']);
+// 	if ($tkuma->site('status_randommsg') != 0) {
+// 		$names = $tkuma->site('random_msg');
+// 		$name_array = explode(",", $names);
+// 		$random_key = array_rand($name_array);
+// 		$selected_name = $name_array[$random_key];
+// 		$get_cmt = $selected_name;
+// 	} else {
+// 		$get_cmt = $tkuma->site('msg_game');
+// 	}
+// 	$get_cmt_band = $tkuma->site('band');
+// 	$msg_send = $get_cmt . ": " . $tranIdd;
+// 	$msg_band = $get_cmt_band;
 
-	if ($getlist_momo) {
-		#1
-		foreach ($getlist_momo as $rows) {
-			$mbbank = new GateIO($rows['uid'], $apiKey_gateio, $apiSecret_gateio);
+//Lấy danh sách tài khoản gateio
+$gateAccounts = $tkuma->get_list("SELECT * FROM `gate_account` WHERE `status` = ? ORDER BY `id` ASC ", ['success']);
 
-			$gethistt = $mbbank->getTransactionHistoryV2();
+if ($gateAccounts) {
+	#1
+	foreach ($gateAccounts as $rows) {
+		//Log gateAccounts
+		sendMessTelegramNew("gateAccounts: " . json_encode($rows));
+		error_log("uid" . $rows['uid']);
+		error_log("apiKey_gateio" . $rows['apiKey']);
+		error_log("apiSecret_gateio" . $rows['apiSecret']);
 
-			// if (isset($gethistt->data->result->responseCode) && $gethistt->data->result->responseCode == '00') {
-			//     //  sendMessTelegramNew("check result");
-			// //	$gethistt = json_encode($gethistt);
-			// //	$gethistt = json_decode($gethistt, true);
-			// //	sendMessTelegramNew($gethistt);
-			// } else {
-			// //	sendMessTelegramNew("Lỗi khi lấy lịch sử giao dịch: " . json_encode($gethistt));
-			// 	// Kiểm tra lỗi Invalid access token
-			// 	if (isset($gethistt->fault->faultstring) && ($gethistt->fault->faultstring == 'Invalid access token' || $gethistt->fault->faultstring == 'Access Token expired'  || $gethistt->fault->faultstring == 'invalid_token_apigee')) {
-			// 		// Thực hiện đăng nhập lại để lấy token mới
-			// 		$loginResult = $mbbank->doLogin();
-			// 		if (isset($loginResult->result->responseCode) && $loginResult->result->responseCode == '00') {
-			// 			// Gọi lại hàm getTransactionHistoryV2 với token mới
-			// 			$gethistt = $mbbank->getTransactionHistoryV2();
-			// 			if (isset($gethistt->data->result->responseCode) && $gethistt->data->result->responseCode !== '00') {
-			// 			//	sendMessTelegramNew("Lấy lịch sử giao dịch thành công: " . json_encode($gethistt));
-			// 			//	sendMessTelegramNew('update balance!');
-			//                 balancemb2($rows['token']);
-			//                 die("Vui lòng Chờ phiên tiếp theo:  ❎<br>\n");
-			// 				// $gethistt = json_encode($gethistt);
-			// 				// $gethistt = json_decode($gethistt, true);
-			// 			} else {
-			// 				// Xử lý lỗi khác nếu cần
-			// 				error_log("Lỗi khi lấy lịch sử giao dịch sau khi làm mới token: " . json_encode($gethistt));
-			// 			}
-			// 		} else {
-			// 			// Xử lý lỗi đăng nhập nếu cần
-			// 			error_log("Lỗi khi đăng nhập lại: " . json_encode($loginResult));
-			// 		}
-			// 	} else {
-			// 		// Xử lý lỗi khác nếu cần
-			// 		error_log("Lỗi khi lấy lịch sử giao dịch: " . json_encode($gethistt));
-			// 	}
-			// }
+		$gateio = new GateIO($rows['uid'], $rows['apiKey'], $rows['apiSecret']);
 
+		$gethistt = $gateio->getTransactionHistoryV2();
 
-			// if (isset($gethistt['data']['transactionHistoryList']) && count($gethistt['data']['transactionHistoryList']) > 0) {
-			// 	foreach ($gethistt['data']['transactionHistoryList'] as $ROWHIST) {
+		// if (isset($gethistt['data']['transactionHistoryList']) && count($gethistt['data']['transactionHistoryList']) > 0) {
+		// 	foreach ($gethistt['data']['transactionHistoryList'] as $ROWHIST) {
 
-			//   sendMessTelegramNew("gethistt->transactionHistoryList: " . $gethistt->data->transactionHistoryList );
-			if ($gethistt->data != null || $gethistt->data != "") {
-				foreach ($gethistt->data as $ROWHIST) {
-					//	sendMessTelegramNew("Lịch sử giao dịch: " . json_encode($ROWHIST));
+		//   sendMessTelegramNew("gethistt->transactionHistoryList: " . $gethistt->data->transactionHistoryList );
+		if (!empty($gethistt)) {
+			foreach ($gethistt as $ROWHIST) {
 
+				// Kiểm tra xem uid của giao dịch có khác với uid hiện tại không
+				//Chỉ lấy giao dịch có uid khác với uid hiện tại, tránh trường hợp lấy giao dịch của chính mình
+				if ($ROWHIST['uid'] !== $rows['uid']) { //$ROWHIST['receive_uid'] === $rows['uid']
+					sendMessTelegramNew("Lịch sử giao dịch: " . json_encode($ROWHIST));
+
+					$push_uid = $ROWHIST['push_uid'];
+					$gettranid = $ROWHIST['id'];
+					
+					echo "Transaction ID: " . $ROWHIST['id'] . "\n";
+					echo "Push UID: " . $ROWHIST['push_uid'] . "\n";
+					echo "Receive UID: " . $ROWHIST['receive_uid'] . "\n";
+					echo "Currency: " . $ROWHIST['currency'] . "\n";
+					echo "Amount: " . $ROWHIST['amount'] . "\n";
+				    echo "Status: " . $ROWHIST['status'] . "\n";
+					echo "Create Time: " . date('Y-m-d H:i:s', $ROWHIST['create_time']) . "\n";
+					echo "Message: " . $ROWHIST['message'] . "\n";
 					#3
-					$push_uid = $ROWHIST->push_uid;
-					$gettranid = $ROWHIST->id;
+
 
 					//	sendMessTelegramNew("gettranid " . $gettranid);
 
@@ -102,8 +88,9 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 
 
 
-					$settings1 = strtolower($ROWHIST->message); //ND chuyển TIỀN
-					$getiduser = parse_order_name($settings1);
+					// $settings1 = strtolower($ROWHIST->message); //ND chuyển TIỀN
+					// $getiduser = parse_order_name($settings1);
+					//Tìm kiếm user từ push_uid
 					$getuser = $tkuma->get_row("SELECT * FROM `users` WHERE `uid_gate` = ? ", [$push_uid]);
 					$is_wrong_content = false;
 					if (!$getuser) {
@@ -116,6 +103,7 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 						$ID_momo = $getuser['id']; //Get userid
 					}
 					$partnerID = $getuser['stk'] ?? '';
+					
 					$pattern = $tkuma->site('ndnaptien') . $getiduser;
 					// 	if (preg_match("/$pattern ([^. ]+)[. ]?/", $settings1, $matches)) {
 					//	if (preg_match("/$pattern ([^-.\s]+)[. -]?/", $settings1, $matches)) {
@@ -124,14 +112,14 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 					//		$comment = $settings1;
 					//	}
 
-					$amount = $ROWHIST->amount;  //SỐ TIỀN GIAO DỊCH
+					$amount = $ROWHIST['amount'];  //SỐ TIỀN GIAO DỊCH
 
 					//  sendMessTelegramNew("check sai noi dung :" . $getiduser);
 					//  sendMessTelegramNew("getuser :" . $getuser['stk']);
 
 					$comment = substr($amount, -2);
 					$partnerName = $getuser['username'] ?? '';  //NGƯỜI CHUYỂN 
-					$dataline = "MBBANK2|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST->create_time) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . $settings1 . "|" . getRowRealtime2('gate_count', 'phone', $push_uid, 'name') . "|" . $push_uid;
+					$dataline = "gateio|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST['create_time']) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . getRowRealtime2('gate_account', 'phone', $push_uid, 'name') . "|" . $push_uid;
 					$tranIdd2 = 0;
 					$gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
 
@@ -156,7 +144,7 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 
 						$tkuma->insert("lich_su_choi", [
 							'phone'  =>   $partnerID,
-							'phone_nhan' => $rows['stk'],
+							'phone_nhan' => $rows['uid'],
 							'tranId' =>   $tranIdd,
 							'tranid2' =>   $tranIdd2,
 							'partnerName' => $partnerName,
@@ -279,13 +267,14 @@ if ($_GET['type'] == $tkuma->site('pin_cron')) {
 						pinghistoryuser($getuser['token']);
 					}
 				}
-			} else {
-				echo "KHÔNG CÓ GIAO DỊCH NÀO🅾<br>\n";
 			}
-			echo "<pre>";
-			print_r($gethistt);
-			#END2
+		} else {
+			echo "KHÔNG CÓ GIAO DỊCH NÀO🅾<br>\n";
 		}
-		#END1
+		echo "<pre>";
+		print_r($gethistt);
+		#END2
 	}
+	#END1
 }
+// }

@@ -30,13 +30,13 @@ class GateIO
         //Kết nối database
         $this->tkuma = new DB();
         $this->client = new Client(['http_errors' => false]);
-        $row =  $this->tkuma->get_row("SELECT * FROM `gate_count` WHERE `uid` = ?", [$uid]);
+        $row =  $this->tkuma->get_row("SELECT * FROM `gate_account` WHERE `uid` = ?", [$uid]);
         $this->uid = $uid;
         $this->apiKey_gateio = $apiKey_gateio;
         $this->apiSecret_gateio = $apiSecret_gateio;
-        if (!$this->tkuma->get_row("SELECT * FROM `gate_count` WHERE `uid` = ?", [$uid])) {
+        if (!$this->tkuma->get_row("SELECT * FROM `gate_account` WHERE `uid` = ?", [$uid])) {
             //Nếu chưa có tài khoản thì tạo mới
-            $this->tkuma->insert("gate_count", [
+            $this->tkuma->insert("gate_account", [
                 'uid'      => $this->uid,
                 'apiKey'       => $this->apiKey_gateio,
                 'apiSecret'       => $this->apiSecret_gateio,
@@ -112,6 +112,8 @@ class GateIO
         curl_close($ch);
 
         $transactions = json_decode($response, true);
+        //Log kết quả trả về
+        error_log("Lịch sử giao dịch: " . json_encode($transactions));
         return $transactions;
     }
 
