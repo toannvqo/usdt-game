@@ -44,9 +44,9 @@ if ($gateAccounts) {
 	foreach ($gateAccounts as $rows) {
 		//Log gateAccounts
 		sendMessTelegramNew("gateAccounts: " . json_encode($rows));
-		error_log("uid" . $rows['uid']);
-		error_log("apiKey_gateio" . $rows['apiKey']);
-		error_log("apiSecret_gateio" . $rows['apiSecret']);
+		error_log("uid: " . $rows['uid']);
+		error_log("apiKey_gateio: " . $rows['apiKey']);
+		error_log("apiSecret_gateio: " . $rows['apiSecret']);
 
 		$gateio = new GateIO($rows['uid'], $rows['apiKey'], $rows['apiSecret']);
 
@@ -61,20 +61,19 @@ if ($gateAccounts) {
 
 				// Kiểm tra xem uid của giao dịch có khác với uid hiện tại không
 				//Chỉ lấy giao dịch có uid khác với uid hiện tại, tránh trường hợp lấy giao dịch của chính mình
-				if ($ROWHIST['uid'] !== $rows['uid']) { //$ROWHIST['receive_uid'] === $rows['uid']
+				if ($ROWHIST['push_uid'] !== $rows['uid']) { //$ROWHIST['receive_uid'] === $rows['uid']
 					sendMessTelegramNew("Lịch sử giao dịch: " . json_encode($ROWHIST));
 
 					$push_uid = $ROWHIST['push_uid'];
 					$gettranid = $ROWHIST['id'];
-					
+
 					echo "Transaction ID: " . $ROWHIST['id'] . "\n";
 					echo "Push UID: " . $ROWHIST['push_uid'] . "\n";
 					echo "Receive UID: " . $ROWHIST['receive_uid'] . "\n";
 					echo "Currency: " . $ROWHIST['currency'] . "\n";
 					echo "Amount: " . $ROWHIST['amount'] . "\n";
-				    echo "Status: " . $ROWHIST['status'] . "\n";
+					echo "Status: " . $ROWHIST['status'] . "\n";
 					echo "Create Time: " . date('Y-m-d H:i:s', $ROWHIST['create_time']) . "\n";
-					echo "Message: " . $ROWHIST['message'] . "\n";
 					#3
 
 
@@ -91,7 +90,7 @@ if ($gateAccounts) {
 					// $settings1 = strtolower($ROWHIST->message); //ND chuyển TIỀN
 					// $getiduser = parse_order_name($settings1);
 					//Tìm kiếm user từ push_uid
-					$getuser = $tkuma->get_row("SELECT * FROM `users` WHERE `uid_gate` = ? ", [$push_uid]);
+					$getuser = $tkuma->get_row("SELECT * FROM `users` WHERE `Uid_Gate` = ? ", [$push_uid]);
 					$is_wrong_content = false;
 					if (!$getuser) {
 						// trường hợp này khách nhập sai nội dung, sẽ hoàn tiền lại
@@ -103,8 +102,8 @@ if ($gateAccounts) {
 						$ID_momo = $getuser['id']; //Get userid
 					}
 					$partnerID = $getuser['stk'] ?? '';
-					
-					$pattern = $tkuma->site('ndnaptien') . $getiduser;
+
+					// $pattern = $tkuma->site('ndnaptien') . $getiduser;
 					// 	if (preg_match("/$pattern ([^. ]+)[. ]?/", $settings1, $matches)) {
 					//	if (preg_match("/$pattern ([^-.\s]+)[. -]?/", $settings1, $matches)) {
 					//		$comment = $matches[1];
@@ -119,19 +118,23 @@ if ($gateAccounts) {
 
 					$comment = substr($amount, -2);
 					$partnerName = $getuser['username'] ?? '';  //NGƯỜI CHUYỂN 
-					$dataline = "gateio|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST['create_time']) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . getRowRealtime2('gate_account', 'phone', $push_uid, 'name') . "|" . $push_uid;
+					$dataline = "gateio|" . date("d/m/Y") . "|" . date("d/m/Y", $ROWHIST['create_time']) . "|+" . format_cash($amount) . "|" . $gettranid . "|" . getRowRealtime2('gate_account', 'uid', $push_uid, 'uid') . "|" . $push_uid;
+
+					sendMessTelegramNew("Dòng dữ liệu: " . $dataline);
 					$tranIdd2 = 0;
-					$gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
+					//$gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
 
-					// 	$gettranIdc = checkcrontran($tranIdd);  //kiểm tra tranID ở databse
+					$gettranIdc = checkcrontran($tranIdd);  //kiểm tra tranID ở databse
 
-					// 	$gettranIdc2 = checkcrontran2($tranIdd);  //kiểm tra tranID ở databse
+					$gettranIdc2 = checkcrontran2($tranIdd);  //kiểm tra tranID ở databse
 
+					sendMessTelegramNew("checkcrontran: " . $gettranIdc);
+					sendMessTelegramNew("checkcrontran2: " . $gettranIdc2);
 					// 	if($gettranIdc && !checkcrontran2($tranIdd)){
 					// 	    $gettranIdc = $cronController->remote($tranIdd); //remoite tranID ở redis
 					// 	    $gettranIdc = $cronController->checkdata($tranIdd); //kiểm tra tranID ở redis
 					// 	}
-					if ($gettranIdc || $ROWHIST->status != "PENDING") {
+					if ($gettranIdc) {
 						//  sendMessTelegramNew("đã tồn tại mã gd");
 						echo "ĐÃ TỒN TẠI MÃ GIAO DỊCH: " . $tranIdd . " ❎<br>\n";
 					} else {
@@ -140,7 +143,7 @@ if ($gateAccounts) {
 
 						$tien_nhan = so_nguyen($amount * $ti_le);
 
-						//   sendMessTelegramNew("RESULT_PLAY: ", $RESULT_PLAY);
+						sendMessTelegramNew("ket qua: ", json_encode($RESULT_PLAY));
 
 						$tkuma->insert("lich_su_choi", [
 							'phone'  =>   $partnerID,
@@ -167,7 +170,7 @@ if ($gateAccounts) {
 						]);
 
 
-						//	sendMessTelegramNew("ket qua: ",$RESULT_PLAY['status']);
+						sendMessTelegramNew("ket qua: ", $RESULT_PLAY['status']);
 
 						//	echo ("update ban ghi thua: ". $GHI_DTB);
 						if ($is_wrong_content == 1 || $is_wrong_content == "1") {
